@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'css/danzitalk/main.css' %}">
+<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=uchpw1zwm9"></script>
+<script type="text/javascript" src="{% static 'js/MarkerClustering.js' %}"></script>
+{% endblock %}
+
+{% block navbar %}
+<nav class="sticky-top navbar navbar-expand-lg shadow" id="navbar">
+    <div class="container-fluid">
+        <a style="margin: 0;"class="navbar-brand" id="title" href="/"><img style="height: 2rem;" src="/media/logo.png"></a>
+    <div id="container" class="d-flex flex-row">
+        <a type="button" style="text-decoration: none;">
+            <span class="material-symbols-outlined fill-red" id="search-icon">
+                search
+            </span>
+        </a>
+        <button class="offcanvas-btn d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+            <span class="material-symbols-outlined fill-red" style="font-size: 2rem;">
+                menu
+            </span>
+        </button>
+
+        <div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">메뉴</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-lg-none">
+                {% if user is not None %}
+                <a class="dropdown-item offcanvas-item" href="/community/profile">프로필</a>
+                {% else %}
+                <a class="dropdown-item offcanvas-item" href="/community/login">로그인</a>
+                {% endif %}
+                <a class="dropdown-item offcanvas-item" href="#">공지사항</a></li>
+            </div>
+        </div>
+        <div class="dropstart d-none d-lg-block">
+            <a type="button" class="btn btn-link d-flex justify-content-end p-0" id="profile_btn" data-bs-toggle="dropdown">
+                <span class="material-symbols-outlined fill-red" style="font-size: 2rem;">
+                    menu
+                </span>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    {% if user is not None %}
+                    <a class="dropdown-item" href="/community/profile">프로필</a>
+                    {% else %}
+                    <a class="dropdown-item" href="/community/login">로그인</a>
+                    {% endif %}
+                </li>
+                <li><a class="dropdown-item" href="#">공지사항</a></li>
+            </ul>
+        </div>
+    </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div id="main">
+    <div id="map" style="width:100%;height: 100%;"></div>
+
+</div>
+{% endblock %}
+{% block script %}
+
+<script>
+var HOME_PATH = '/media'
+
+var mapOptions = {
+    center: new naver.maps.LatLng(37.4995704, 127.065399),
+    zoom: 17
+};
+
+var map = new naver.maps.Map('map', mapOptions);
+
+var htmlMarker1 = {
+        content: '<div style="cursor:pointer;width:40px;height:40px;line-height:42px;font-size:10px;color:white;text-align:center;font-weight:bold;background:url('+ HOME_PATH +'/cluster-marker-1.png);background-size:contain;"></div>',
+        size: N.Size(40, 40),
+        anchor: N.Point(20, 20)
+    },
+    htmlMarker2 = {
+        content: '<div style="cursor:pointer;width:40px;height:40px;line-height:42px;font-size:10px;color:white;text-align:center;font-weight:bold;background:url('+ HOME_PATH +'/cluster-marker-2.png);background-size:contain;"></div>',
+        size: N.Size(40, 40),
+        anchor: N.Point(20, 20)
+    },
+    htmlMarker3 = {
+        content: '<div style="cursor:pointer;width:40px;height:40px;line-height:42px;font-size:10px;color:white;text-align:center;font-weight:bold;background:url('+ HOME_PATH +'/cluster-marker-3.png);background-size:contain;"></div>',
+        size: N.Size(40, 40),
+        anchor: N.Point(20, 20)
+    },
+    htmlMarker4 = {
+        content: '<div style="cursor:pointer;width:40px;height:40px;line-height:42px;font-size:10px;color:white;text-align:center;font-weight:bold;background:url('+ HOME_PATH +'/cluster-marker-4.png);background-size:contain;"></div>',
+        size: N.Size(40, 40),
+        anchor: N.Point(20, 20)
+    },
+    htmlMarker5 = {
+        content: '<div style="cursor:pointer;width:40px;height:40px;line-height:42px;font-size:10px;color:white;text-align:center;font-weight:bold;background:url('+ HOME_PATH +'/cluster-marker-5.png);background-size:contain;"></div>',
+        size: N.Size(40, 40),
+        anchor: N.Point(20, 20)
+    };
+
+var realities = JSON.parse('{{realities|safe}}');
+var markers = [],
+    infoWindows = [];
+
+function getClickHandler(id) {
+    return function(e) {
+        location.href="/community/"+id;
+    }
+}
+
+function getMouseoverHandler(seq) {
+    return function(e) {
+        if (!infoWindows[seq].getMap()) {
+            infoWindows[seq].open(map, markers[seq]);
+        }
+    }
+}
+
+function getMouseoutHandler(seq) {
+    return function(e) {
+        if (infoWindows[seq].getMap()) {
+            infoWindows[seq].close();
+        }
+    }
+}
+
+realities.forEach(element => {
+    var marker = new naver.maps.Marker({
+        position: new naver.maps.LatLng(element.y, element.x),
+        icon: {
+            content: [    
+            '<div class="marker-card text-white" style="position:absolute; left:-25px; text-align:center;">',
+            '<div class="marker-img"><img src="/media/marker.png" style="width:50px;"></div>',
+            '</div>',
+            ].join(''),
+        },
+        size: new naver.maps.Size(64, 48),
+        anchor: new naver.maps.Point(32, 48),
+    });
+    
+    var infoWindowContent = [
+        '<div class="iw-inner p-2" style="text-align:center;">',
+        '   <div class="iw-header">'+element.name+'</div>',
+        '   <div class="iw-content">'+element.address+'</div>',
+        '</div>'
+        ].join('');
+
+    var infoWindow = new naver.maps.InfoWindow({
+            content: infoWindowContent,
+            disableAnchor: true
+    });
+    
+    markers.push(marker);
+    infoWindows.push(infoWindow);
+
+    naver.maps.Event.addListener(marker, 'click', getClickHandler(element.id));
+    naver.maps.Event.addListener(marker, 'mouseover', getMouseoverHandler(infoWindows.length-1));
+    naver.maps.Event.addListener(marker, 'mouseout', getMouseoutHandler(infoWindows.length-1));
+});
+
+/*
+
+naver.maps.Event.addListener(map, 'idle', function() {
+    updateMarkers(map, markers);
+});
+
+function updateMarkers(map, markers) {
+
+    var mapBounds = map.getBounds();
+    var marker, position;
+
+    for (var i = 0; i < markers.length; i++) {
+
+        marker = markers[i]
+        position = marker.getPosition();
+
+        if (mapBounds.hasLatLng(position)) {
+            showMarker(map, marker);
+        } else {
+            hideMarker(map, marker);
+        }
+        hideMarker(map, marker);
+    }
+}
+
+function showMarker(map, marker) {
+
+if (marker.getMap()) return;
+marker.setMap(map);
+}
+
+function hideMarker(map, marker) {
+
+if (!marker.getMap()) return;
+console.log("a");
+marker.setMap(null);
+}
+*/
+
+var markerClustering = new MarkerClustering({
+    minClusterSize: 2,
+    maxZoom: 16,
+    map: map,
+    markers: markers,
+    disableClickZoom: false,
+    gridSize: 200,
+    icons: [htmlMarker1, htmlMarker2, htmlMarker3, htmlMarker4, htmlMarker5],
+    indexGenerator: [10, 100, 200, 500, 1000],
+    stylingFunction: function(clusterMarker, count) {
+        $(clusterMarker.getElement()).find('div:first-child').text(count);
+    }
+    });
+
+
+
+$('#search-icon').click(function(){
+    var csrftoken = getCookie('csrftoken');
+    $.ajax({
+        url: "/",
+        data: {
+            search_text: '',
+
+        },
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Searching", data);
+            location.replace("/reality/search");
+        },
+        error: function (request, status, error) {
+            console.log("Error : Searching", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Searching", data);
+        }
+    });
+    
+});
+
+/*
+let search_function = function() {
+    let search_text = $('#search-text').val();
+    
+    $.ajax({
+        url: "/",
+        data: {
+            search_text: search_text
+        },
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Searching", data);
+            location.replace("/reality/search");
+        },
+        error: function (request, status, error) {
+            console.log("Error : Searching", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Searching", data);
+        }
+    });
+}
+$('#search-icon').click(search_function)
+$('#search-text').keyup(function(key){
+    if (key.keyCode == 13) search_function();
+})
+*/
+
+</script>
+
+{% endblock %}

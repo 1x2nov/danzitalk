@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'css/reality/search.css' %}">
+{% endblock %}
+{% block navbar %}
+<nav class="sticky-top navbar navbar-expand-lg border-bottom" id="navbar">
+    <div class="container-fluid">
+        <span class="material-symbols-outlined">
+            <a style="display:flex; color: black; text-decoration: none; width:2rem" href="/">arrow_back</a>
+        </span>
+    <input class="flex-fill form-control" list="datalistOptions" id="search-text" placeholder="검색어 입력">
+    </div>
+</nav>
+{% endblock %}
+{% block content %}
+{% if is_empty %}
+{% if not is_none %}
+<div class="reality-empty border-bottom">
+    검색 결과가 존재하지 않습니다.
+</div>
+{% endif %}
+<ul id="reality-list" style="border-bottom: 8px solid #e9ecef; margin:0;">
+<strong>북마크 된 단지</strong>
+{% for item in marked_reality_list %}
+<li class="reality-item">
+<button type="button" class="btn btn-light reality-btn" reality-id = "{{item.id}}">
+    <div class="label-container">
+        <span>{{item.title}}</span>
+    </div>
+    <div class="desc">
+        <span>{{item.desc}}</span>
+    </div>
+    <div class="bookmark-container d-flex align-items-center justify-content-center">
+        <!--
+        {% if item.is_mark %}
+            <span style="margin-right: 0.5rem;" class="fill-yellow material-symbols-outlined">
+                star
+            </span>
+            <span style="margin-right: 1rem;" class="fill-yellow">
+                {{item.bookmark_count}}
+            </span>
+        {% else %}
+            <span style="margin-right: 0.5rem;" class="material-symbols-outlined">
+                star
+            </span>
+            <span style="margin-right: 1rem;">
+                {{item.bookmark_count}}
+            </span>
+        {% endif %}
+
+        <span style="margin-right: 0.5rem;" class="material-symbols-outlined">
+            visibility
+        </span>
+        <span>
+            {{item.reality.hits}}
+        </span>
+        -->
+        
+    </div>
+</button>
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+<ul id="reality-list">
+{% if is_empty %}
+<strong>추천 단지</strong>
+{% endif %}
+{% for item in reality_list %}
+<li class="reality-item">
+<button type="button" class="btn btn-light reality-btn" reality-id = "{{item.id}}">
+    <div class="label-container">
+        <span>{{item.title}}</span>
+    </div>
+    <div class="desc">
+        <span>{{item.desc}}</span>
+    </div>
+    <div class="bookmark-container d-flex align-items-center justify-content-center">
+        <!--
+        {% if item.is_mark %}
+            <span style="margin-right: 0.5rem;" class="fill-yellow material-symbols-outlined">
+                star
+            </span>
+            <span style="margin-right: 1rem;" class="fill-yellow">
+                {{item.bookmark_count}}
+            </span>
+        {% else %}
+            <span style="margin-right: 0.5rem;" class="material-symbols-outlined">
+                star
+            </span>
+            <span style="margin-right: 1rem;">
+                {{item.bookmark_count}}
+            </span>
+        {% endif %}
+
+        <span style="margin-right: 0.5rem;" class="material-symbols-outlined">
+            visibility
+        </span>
+        <span>
+            {{item.reality.hits}}
+        </span>
+        -->
+    </div>
+</button>
+</li>
+{% endfor %}
+</ul>
+{% endblock %}
+{% block script %}
+<script>
+$(".reality-btn").click(function(){
+    let reality_id = $(this).attr("reality-id");
+    location.href="/community/"+reality_id;
+})
+
+let search_function = function() {
+    let search_text = $('#search-text').val();
+    
+    $.ajax({
+        url: "/",
+        data: {
+            search_text: search_text
+        },
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Searching", data);
+            location.replace("/reality/search");
+        },
+        error: function (request, status, error) {
+            console.log("Error : Searching", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Searching", data);
+        }
+    });
+}
+$('#search-text').keyup(function(key){
+    if (key.keyCode == 13) search_function();
+})
+</script>
+{% endblock %}

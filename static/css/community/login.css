@@ -1,0 +1,33 @@
+.card-title {
+    font-weight: bolder;
+    font-size: 2.25rem;
+}
+
+.card-subtitle {
+    font-size: 0.75rem;
+    color: gray;
+}
+
+.top-hr {
+    width: 10%;
+    margin: auto;
+    margin-bottom: 1rem;
+}
+
+.social-container > a {
+    text-decoration: none;
+    color: white;
+    font-weight: bolder;
+}
+
+.naver-container {
+    background-color: #03C75A;
+}
+
+.social-container {
+    border-radius: 0.5rem;
+    height: 2rem;
+    line-height: 2rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+}

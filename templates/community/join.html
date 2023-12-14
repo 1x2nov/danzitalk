@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'css/community/join.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center flex-column" id="main">
+<div class="card shadow rounded-5 mb-5" style="width: 100%;">
+    <div class="card-body" style="text-align: center">
+      <h3 class="card-title">회원가입</h3>
+      <h6 class="card-subtitle mb-3 text-muted">단지, 톡으로 원하는 단지에 대해 소통하세요.</h6>
+      <div class="form-floating mb-3">
+        <input type="email" class="form-control" id="input-email" placeholder="name@example.com">
+        <label for="input-email">이메일 주소</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="input-name" placeholder="example">
+        <label for="input-name">이름</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="input-nickname" placeholder="example">
+        <label for="input-nickname">사용자 이름</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="input-password" placeholder="example">
+        <label for="input-password">비밀번호</label>
+      </div>
+      <button id="join-button" class="btn btn-primary mb-3" style="width: 100%;">회원가입</button>
+    </div>
+  </div>
+  <div class="card shadow rounded-5" style="width: 100%;">
+    <div class="card-body" style="text-align: center">
+      <div>계정이 있다면, <a href="/community/login" class="link-primary">로그인</a>하세요.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$('#join-button').click(function() {
+    let email = $('#input-email').val();
+    let password = $('#input-password').val();
+    let nickname = $('#input-nickname').val();
+    let name = $('#input-name').val();
+
+    $.ajax({
+        url: "/community/join",
+        data: {
+            email: email,
+            password: password,
+            nickname: nickname,
+            name: name
+        },
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Join button", data);
+            location.replace("/community/login");
+        },
+        error: function (request, status, error) {
+            console.log("Error : Join button", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Join button", data);
+        }
+    });
+})
+</script>
+{% endblock %}

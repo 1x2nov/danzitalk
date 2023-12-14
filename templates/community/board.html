@@ -1,0 +1,637 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block extrahead %}
+<link rel="stylesheet" href="{% static 'css/community/board.css' %}">
+{% endblock %}
+
+{% block navbar %}
+<nav class="sticky-top navbar navbar-expand-lg border-bottom shadow-sm" id="navbar">
+    <div class="container-fluid">
+        <span class="material-symbols-outlined">
+            <a style="display:flex; color: black; text-decoration: none; width: 0; margin: 0;" href="/">arrow_back</a>
+        </span>
+    <div class="text-center">
+        <div class="reality-title">{{reality_title}}</div>
+        <div class="reality-address">{{reality_desc}}</div>
+    </div>
+    <div id="container" style="width: 0;">
+        {% if user is not None %}
+        <a type="button" class="btn btn-link d-flex justify-content-end p-0" id="profile_btn" href="/community/profile">
+            <span class="material-symbols-outlined fill" style="font-size: 2rem;">
+                menu
+            </span>
+        </a>
+        {% else %}
+        <a type="button" class="btn btn-link d-flex justify-content-end p-0" id="login_btn" href="/community/login">
+            <span class="material-symbols-outlined fill-red" style="font-size: 2rem;">
+                menu
+            </span>
+        </a>
+        {% endif %}
+    </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class=" d-flex align-items-center flex-column" id="main">
+
+    <div class="modal fade" id="deletePostingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5">게시글 삭제</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            게시글을 삭제하시겠습니까?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+            <button type="button" class="btn btn-danger delete-posting">삭제</button>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="ad-container">
+        <ins class="kakao_ad_area" style="display:none;"
+        data-ad-unit = "DAN-vaRO4pBaV7UUqUzq"
+        data-ad-width = "320"
+        data-ad-height = "50"></ins>
+    </div>
+    <div style="width: 100%;">
+        <div class="silgeorae-container mb-3">
+            <div id="silgeorae-select-container" class="d-flex justify-content-center mb-4">
+                <div id="silgeorae-select-mode" class="d-flex">
+                    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                    {% for area in area_set %}
+                        {% if forloop.counter == 1 %}
+                        <input type="radio" class="btn-check" name="silgeorae-btnradio" id="silgeorae-btnradio{{forloop.counter}}" autocomplete="off" checked>
+                        <label class="silgeorae-select-btn btn" for="silgeorae-btnradio{{forloop.counter}}">{{area}}m<sup>2</sup></label>
+                        {% else %}
+                        <input type="radio" class="btn-check" name="silgeorae-btnradio" id="silgeorae-btnradio{{forloop.counter}}" autocomplete="off">
+                        <label class="silgeorae-select-btn btn" for="silgeorae-btnradio{{forloop.counter}}">{{area}}m<sup>2</sup></label>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                    
+                </div>
+                {% if is_mark %}
+                    <span class="material-symbols-outlined bookmark-icon fill-yellow">
+                    star
+                    </span>
+                {% else %}
+                    <span class="material-symbols-outlined bookmark-icon">
+                    star
+                    </span>
+                {% endif %}
+            </div>
+            <div class="silgeorae-content d-flex flex-row">
+                <div class="silgeorae-text-contianer flex-fill text-center">
+                    <div class="silgeorae-text">최근 매매 실거래가</div>
+                    <div class="silgeorae-amount mt-3"></div>
+                    <div class="silgeorae-value mb-3 d-flex justify-content-center"><div class="int"></div>&nbsp&nbsp&nbsp<div class="percent"></div></div>
+                    <div class="silgeorae-desc">-</div>
+                </div>
+                <div class="rent-text-contianer flex-fill text-center">
+                    <div class="rent-text">최근 전세 실거래가</div>
+                    <div class="rent-amount mt-3"></div>
+                    <div class="rent-value mb-3 d-flex justify-content-center"><div class="int"></div>&nbsp&nbsp&nbsp<div class="percent"></div></div>
+                    <div class="rent-desc">-</div>
+                </div>
+            </div>
+            <div class="silgeorae-footer-container">
+                
+                <div class="silgeorae-icon"></div>
+            </div>
+        </div>
+        <div class="select-page btn-group border-bottom" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" value="1" class="btn-check tab-input" name="btnradio" id="btnradio1" autocomplete="off">
+            <label class="tab1-btn btn" for="btnradio1" style="border-left:0; border-right:0;">단지정보</label>
+            
+            <input type="radio" value="2" class="btn-check tab-input" name="btnradio" id="btnradio2" autocomplete="off" checked>
+            <label class="tab2-btn btn" for="btnradio2" style="border-left:0; border-right:0;">토론</label>
+            
+            <input type="radio" value="3" class="btn-check tab-input" name="btnradio" id="btnradio3" autocomplete="off">
+            <label class="tab3-btn btn" for="btnradio3" style="border-left:0; border-right:0;">매물</label>
+
+            <input type="radio" value="4" class="btn-check tab-input" name="btnradio" id="btnradio4" autocomplete="off">
+            <label class="tab4-btn btn" for="btnradio4" style="border-left:0; border-right:0;">시세</label>
+        </div>
+        <div class="main-content">
+            <div id="tab-1" class="tab-content m-3">
+                <div class="tab-1-title mb-3">단지정보</div>
+                <table class="table table-hover border-top">
+                    <tbody>
+                        <tr>
+                            <th width="75rem"scope="row" class="table-active">주소</th>
+                            <td colspan="3">
+                                {{reality_desc}}
+                                {% if reality.doroJuso is not None %}
+                                <br><span class="badge text-bg-secondary">도로명</span> {{reality.doroJuso}}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">용적률</th>
+                            <td width="110rem">
+                                {% if reality.vlRat > 0 %}
+                                {{reality.vlRat|floatformat:"0"}}%
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td width="90rem" class="table-active">건폐율</td>
+                            <td>
+                                {% if reality.bcRat > 0 %}
+                                {{reality.bcRat|floatformat:"0"}}%
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>   
+                        <tr>
+                            <th scope="row" class="table-active">대지면적</th>
+                            <td>
+                                {% if reality.platArea > 0 %}
+                                {{reality.platArea|floatformat:"0"}}m<sup>2</sup>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="table-active">세대수</td>
+                            <td>{{reality.kaptdaCnt}}세대</td>
+                        </tr>   
+                        <tr>
+                            <th scope="row" class="table-active">사용승인일</th>
+                            <td>{{reality.kaptUsedate|slice:":4"}}년 {{reality.kaptUsedate|slice:"4:6"}}월 {{reality.kaptUsedate|slice:"6:8"}}일</td>
+                            <td class="table-active">승강기대수</td>
+                            <td colspan="3">{{reality.kaptdEcnt}}</td>                     
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">총주차대수</td>
+                            <td>{{dPcnt}}대<br>(세대당 {{daPdp}}대)</td>
+                            <td class="table-active">주차관제<br>홈네트워크</td>
+                            <td colspan="3">{{reality.codeNet}}</td>                        
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">시공사</th>
+                            <td>{{reality.kaptBcompany}}</td>
+                            <td class="table-active">시행사</td>
+                            <td colspan="3">{{reality.kaptAcompany}}</td>                        
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">CCTV대수</th>
+                            <td>{{reality.kaptdCccnt}}</td>
+                            <td class="table-active">음식물처리방법</td>
+                            <td colspan="3">{{reality.codeGarbage}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">건물구조</th>
+                            <td>{{reality.codeStr}}</td>
+                            <td class="table-active">복도유형</td>
+                            <td colspan="3">{{reality.codeHallNm}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">난방방식</th>
+                            <td>{{reality.codeHeatNm}}</td>
+                            <td class="table-active">에너지효율등급</td>
+                            <td>
+                                {% if reality.engrGrade is not None %}
+                                {{reality.engrGrade}}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">부대<br>복리시설</th>
+                            <td>{{reality.welfareFacility}}</td>
+                            <th class="table-active">버스정류장 거리</th>
+                            <td>{{reality.kaptdWtimebus}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">철도 접근성</th>
+                            <td colspan="3">{{reality.subwayLine}} / {{reality.subwayStation}} / {{reality.kaptdWtimesub}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">편의시설</th>
+                            <td colspan="3">{{reality.convenientFacility}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">교육시설</th>
+                            <td colspan="3">{{reality.educationFacility}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">분양형태</th>
+                            <td colspan="3">{{reality.codeSaleNm}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">관리방식</th>
+                            <td colspan="3">{{reality.codeMgrNm}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="table-active">관리사무소연락처</th>
+                            <td colspan="3">{{kaptTel}}</td>
+                        </tr>
+                    </tbody>
+                  </table>
+            </div>
+            <div id="tab-2" class="tab-content current">
+                <div id="posting-select-mode" class="d-flex justify-content-between">
+                    <a class="btn btn-outline-secondary" href="{% url 'create_posting' reality.id %}">글쓰기</a>
+                </div>
+                {% for posting in postings %}
+                    <div id="posting" class="posting" posting-id="{{ posting.posting.id }}">
+                        <div id="posting-title" class="posting-title mb-2 d-flex justify-content-between align-items-center" posting-id="{{posting.posting.id}}">
+                            <b>{{ posting.posting.title }}</b>
+                            {% if posting.posting.user == user %}
+                        
+                            <div class="post-setting-container dropdown" onclick="event.stopPropagation();">
+                                <span class="posting-setting-icon material-symbols-outlined" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    more_vert
+                                </span>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="posting-setting-delete-btn dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePostingModal" posting-id="{{posting.posting.id}}">
+                                            삭제
+                                        </button>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div id="posting-user" class="d-flex flex-row align-items-center mb-2">
+                            <!-- Profile image 
+                            <img src="{% get_media_prefix %}{{ posting.posting.user.profile_image }}" class="img-fluid rounded-circle shadow profile" style="width:1rem; height:1rem;">
+                            -->
+                            <div class="posting-desc-user" style="margin:0 0 0 0;">{{ posting.posting.user.nickname }}</div>
+                            <div class="posting-desc-time" style="margin:0 0 0 0;">{{ posting.posting.created_at | date:"Y-m-d h:i" }}</div>
+                            <div class="posting-desc-hit" style="margin:0 0 0 0;">조회수 {{ posting.posting.hits }}</div>
+                        </div>
+                        <div id="posting-content" class="posting-content mb-2" posting-id="{{ posting.posting.id }}">{{ posting.posting.content }}</div>
+                        <div id="posting-footer" class=" d-flex flex-row align-items-center justify-content-between">
+                            <div id="posting-footer-left" class="d-flex flex-row align-items-center">
+                                {% if posting.is_like %}
+                                    <span id="like-icon" class="fill-red material-symbols-outlined">
+                                        thumb_up
+                                    </span>
+                                    <div id="like-count" class="fill-red">{{ posting.like_count }}</div>
+                                {% else %}
+                                    <span id="like-icon" class="material-symbols-outlined">
+                                        thumb_up
+                                    </span>
+                                    <div id="like-count">{{ posting.like_count }}</div>
+                                {% endif %}
+                    
+                                {% if posting.is_hate %}
+                                    <span id="hate-icon" class="fill-blue material-symbols-outlined">
+                                        thumb_down
+                                    </span>
+                                    <div id="hate-count" class="fill-blue">{{ posting.hate_count }}</div>
+                                {% else %}
+                                    <span id="hate-icon" class="material-symbols-outlined">
+                                        thumb_down
+                                    </span>
+                                    <div id="hate-count">{{ posting.hate_count }}</div>
+                                {% endif %}
+                            </div>
+                            <div id="posting-footer-right" class="d-flex flex-row align-items-center">
+                                <div id="comment-count">{{ posting.comment_count }}</div>
+                                <span id="comment-icon" class="material-symbols-outlined">
+                                    comment
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                <div style="height: 10rem; line-height: 10rem; text-align: center;">
+                    <div>게시글이 없습니다. </div>
+                </div>
+                {% endfor %}
+            </div> 
+            <div id="tab-3" class="tab-content">
+                준비중입니다.
+            </div>
+            <div id="tab-4" class="tab-content">
+                <div id="highcharts-container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+            </div>
+        </div>
+    </div>
+        
+</div>
+{% endblock %}
+
+{% load index %}
+{% block script %}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script>
+$(".posting-title").click(function(){
+    let posting_id = $(this).attr("posting-id");
+    location.href="/community/read/"+posting_id;
+})
+$(".posting-content").click(function(){
+    let posting_id = $(this).attr("posting-id");
+    location.href="/community/read/"+posting_id;
+})
+$(".bookmark-icon").click(function(){
+    let is_mark = $(".bookmark-icon").hasClass("fill-yellow") == true
+    let user_id = "{{ user.id }}";
+
+    if (is_mark){
+        $(this).removeClass('fill-yellow');
+    }
+    else{
+        $(this).addClass('fill-yellow');
+    }
+
+    if (user_id==''){
+        location.href="/community/login";
+        return
+    }
+
+    $.ajax({
+        url: "/reality/{{reality.id}}/bookmark",
+        data: {
+            is_mark:is_mark,
+            user_id:user_id
+        },
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Bookmark", data);
+        },
+        error: function (request, status, error) {
+            console.log("Error : Bookmark", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Bookmark", data);
+        }
+    });
+})
+
+$(".posting-setting-delete-btn").click(function(){
+    $(".delete-posting").attr("posting-id", $(this).attr("posting-id"));
+});
+
+$(".delete-posting").click(function(){
+    $.ajax({
+        url: "/community/delete/"+$(this).attr("posting-id"),
+        type: "POST",
+        success: function (data) {
+            console.log("Success : Delete Posting Button", data);
+            location.replace("/community/"+'{{reality.id}}')
+        },
+        error: function (request, status, error) {
+            console.log("Error : Delete Posting Button", request, status, error);
+        },
+        complete: function (data) {
+            console.log("Complete : Delete Posting Button", data);
+        }
+    });
+});
+
+var tabs = [];
+for(var i=0; i < 4; i++) {
+    tabs.push($('#tab-'+(i+1)+'.tab-content'));
+}
+
+$("input[type=radio].tab-input").click(function(e){
+    var click_id = e.target.value;
+    for(var i=0; i < 4; i++){
+        tabs[i].removeClass("current");
+    }
+    tabs[1*click_id-1].addClass("current");
+});
+
+var rtms_dict = JSON.parse('{{ rtms_dict_json |safe }}');
+var rtms_rent_dict = JSON.parse('{{ rtms_rent_dict_json |safe }}');
+
+function changeSilgeorae(useArea){
+    
+    var amountDiv = $(".silgeorae-amount");
+    var valueIntDiv = $(".silgeorae-value > .int");
+    var valuePercentDiv = $(".silgeorae-value > .percent");
+    var descDiv = $(".silgeorae-desc");
+
+    if (!(rtms_dict[useArea])) {
+        valueIntDiv.text('');
+        valuePercentDiv.text('');
+        amountDiv.text('');
+        descDiv.text('-');
+        var color = 'black';
+        amountDiv.css('color', color);
+        valueIntDiv.css('color', color);
+        valuePercentDiv.css('color', color);
+        return;
+    }
+
+    amountDiv.text(rtms_dict[useArea][0]['amount']);
+
+    var cur_amount = rtms_dict[useArea][0]['amount'].split(',').join('') * 1;
+
+    var year = rtms_dict[useArea][0]['year'];
+    var month = rtms_dict[useArea][0]['month'];
+    var day = rtms_dict[useArea][0]['day'];
+    var date = year+"."+(month>9?"":"0")+month+"."+(day>9?"":"0")+day
+
+    var apm = Math.round(cur_amount / useArea / 10) * 10;
+    descDiv.text(date+' / ㎡당 약 '+apm+"만원");
+
+    if (rtms_dict[useArea].length == 1) {
+        valueIntDiv.text('');
+        valuePercentDiv.text('');
+        var color = 'black';
+        amountDiv.css('color', color);
+        valueIntDiv.css('color', color);
+        valuePercentDiv.css('color', color);
+        return;
+    }
+
+    var last_amount = rtms_dict[useArea][1]['amount'].split(',').join('') * 1;
+    var damount = cur_amount - last_amount;
+    var isMinus = damount < 0;
+    valueIntDiv.text((isMinus?'▼':"▲")+Math.abs(damount));
+
+    
+    var dpercent = damount/last_amount * 100
+    valuePercentDiv.text((isMinus?'':"+")+Math.round(dpercent * 100) / 100 + '%');
+
+    var color = isMinus?'#006eff':'red'
+    amountDiv.css('color', color);
+    valueIntDiv.css('color', color);
+    valuePercentDiv.css('color', color);
+    
+};
+
+function changeRent(useArea){
+
+    var valueIntDiv = $(".rent-value > .int");
+    var valuePercentDiv = $(".rent-value > .percent");
+    var amountDiv = $(".rent-amount");
+    var descDiv = $(".rent-desc");
+
+    if (!(rtms_rent_dict[useArea])) {
+        valueIntDiv.text('');
+        valuePercentDiv.text('');
+        amountDiv.text('');
+        descDiv.text('-');
+        var color = 'black';
+        amountDiv.css('color', color);
+        valueIntDiv.css('color', color);
+        valuePercentDiv.css('color', color);
+        return;
+    }
+
+    amountDiv.text(rtms_rent_dict[useArea][0]['amount']);
+
+    var cur_amount = rtms_rent_dict[useArea][0]['amount'].split(',').join('') * 1;
+
+    var year = rtms_rent_dict[useArea][0]['year'];
+    var month = rtms_rent_dict[useArea][0]['month'];
+    var day = rtms_rent_dict[useArea][0]['day'];
+    var date = year+"."+(month>9?"":"0")+month+"."+(day>9?"":"0")+day
+
+    var apm = Math.round(cur_amount / useArea / 10) * 10;
+    descDiv.text(date+' / ㎡당 약 '+apm+"만원");
+
+    if (rtms_rent_dict[useArea].length == 1) {
+        valueIntDiv.text('');
+        valuePercentDiv.text('');
+        var color = 'black';
+        amountDiv.css('color', color);
+        valueIntDiv.css('color', color);
+        valuePercentDiv.css('color', color);
+        return;
+    }
+
+    var last_amount = rtms_rent_dict[useArea][1]['amount'].split(',').join('') * 1;
+    var damount = cur_amount - last_amount;
+    var isMinus = damount < 0;
+    valueIntDiv.text((isMinus?'▼':"▲")+Math.abs(damount));
+
+    
+    var dpercent = damount/last_amount * 100
+    valuePercentDiv.text((isMinus?'':"+")+Math.round(dpercent * 100) / 100 + '%');
+
+    var color = isMinus?'#006eff':'red'
+    amountDiv.css('color', color);
+    valueIntDiv.css('color', color);
+    valuePercentDiv.css('color', color);
+    
+}
+
+let isAreaSet = '{{area_set|length}}' != '0';
+console.log(isAreaSet);
+if (isAreaSet){
+    changeSilgeorae("{{area_set|index:0}}");
+    changeRent("{{area_set|index:0}}");
+}
+
+$(".silgeorae-select-btn").click(function(){
+    changeSilgeorae($(this).text().slice(0, -2));
+    changeRent($(this).text().slice(0, -2));
+});
+
+let rtms_data = [];
+let rtms_rent_data = [];
+
+if (isAreaSet){
+    let area_temp = "{{area_set|index:0}}";
+
+    rtms_dict[area_temp].forEach(function(e){
+        let amount = Number(e['amount'].replace(',', ''));
+        let y = e['year'], m = e['month'], d = e['day'];
+        console.log(y,m,d);
+        rtms_data.push({x:Date.UTC(y,m-1,d), y: amount*10000});
+    });
+
+    rtms_rent_dict[area_temp].forEach(function(e){
+    let amount = Number(e['amount'].replace(',', ''));
+    let y = e['year'], m = e['month'], d = e['day'];
+    console.log(y,m,d);
+    rtms_rent_data.push({x:Date.UTC(y,m-1,d), y: amount*10000});
+    });
+}
+
+$(function () {
+    $('#highcharts-container').highcharts({
+        chart: {
+            type: 'area'
+        },
+        title: {
+            text: ''
+        },
+        xAxis: {
+            type: 'datetime',
+            labels: {
+                format: '{value:%Y-%m}'
+            },
+        },
+        yAxis: {
+            min: null,
+            title: {
+                text: '억원',
+            },
+            labels: {
+                formatter : function () {
+                    return this.value / 100000000;
+                }
+            }
+        },
+        tooltip: {
+            shared: true,
+            valueSuffix: ' 원',
+            xDateFormat: '%Y년 %m월 %d일'
+        },
+        plotOptions: {
+            area: {
+                stacling: 'normal',
+                lineWidth: 1,
+                marker: {
+                		radius: 0,
+                    lineWidth: 0,
+                }
+            }
+        },
+        series: [{
+            threshold: null,
+            name: '매매',
+            data: rtms_data,
+            lineColor: '#248f97',
+            color: {
+                linearGradient: {
+                    x1: 0,
+                    x2: 0,
+                    y1: 0,
+                    y2: 1
+                },
+                stops: [
+                    [0, '#248f97'],
+                    [1, 'rgba(255,255,255,0.5)']
+                ]
+            }
+        }, {
+            threshold: null,
+            name: '전세',
+            data: rtms_rent_data,
+            lineColor: '#D62BF4',
+            color: {
+                linearGradient: {
+                    x1: 0,
+                    x2: 0,
+                    y1: 0,
+                    y2: 1
+                },
+                stops: [
+                    [0, '#D62BF4'],
+                    [1, 'rgba(255,255,255,0.5)']
+                ]
+            }
+        }]
+    });
+});
+</script>
+{% endblock %}

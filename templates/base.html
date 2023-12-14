@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <title>단지톡 : 단지, 톡으로 소통하는 커뮤니티</title>
+        <link rel="icon" type="images/png" href="{% get_media_prefix %}logoicon.png">
+
+        <!-- Bootstrap -->
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+        <!-- Google icon -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        
+        <!-- Base CSS -->
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+        
+        <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="{% static 'js/base.js' %}"></script>
+        <!-- Extra CSS -->
+        {% block extrahead %}
+        {% endblock %}
+    </head>
+    <body>
+        
+        {% block navbar %}
+        <nav class="sticky-top navbar navbar-expand-lg border-bottom" id="navbar">
+            <div class="container-fluid">
+            <a class="navbar-brand" id="title" href="/"><img style="height: 2rem;" src="/media/logo.png"></a>
+            <div id="container">
+                {% if user is not None %}
+                <a type="button" class="btn btn-link d-flex justify-content-end p-0" id="profile_btn" href="/community/profile">
+                    <span class="material-symbols-outlined fill" style="font-size: 2rem;">
+                        person
+                    </span>
+                </a>
+                {% else %}
+                <a type="button" class="btn btn-link d-flex justify-content-end p-0" id="login_btn" href="/community/login">
+                    <span class="material-symbols-outlined fill" style="font-size: 2rem;">
+                        person
+                    </span>
+                </a>
+                {% endif %}
+            </div>
+            </div>
+        </nav>
+        {% endblock %}
+        
+        {% block content %}
+        {% endblock %}
+    </body>
+    {% block script %}
+    {% endblock %}
+</html>

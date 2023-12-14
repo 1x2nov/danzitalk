@@ -1,0 +1,44 @@
+#search-icon {
+    padding-right: 1rem;
+    align-items: center;
+    display: flex;
+    font-size: 2rem;
+}
+
+#search-text {
+    padding-inline-start: 25px;
+}
+
+.navbar {
+    height: 60px;
+}
+
+#main {
+    height: calc(100% - 60px);
+}
+
+.marker-card {
+    font-size: 0.5rem;
+}
+
+.marker-card > .card-body{
+    font-size: 0.5rem;
+}
+
+.iw-header {
+    font-size: 1rem;
+}
+
+.iw-content {
+    font-size: 0.5rem;
+    color: gray;
+}
+.offcanvas-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.offcanvas-item {
+    margin-bottom: 1rem;
+}

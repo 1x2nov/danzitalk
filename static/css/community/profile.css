@@ -1,0 +1,28 @@
+#profile-image:hover{
+    filter: brightness(90%);
+    transition: filter 0.25s;
+}
+#reality-list{
+    list-style: none;
+}
+ul {
+    padding-left: 0;
+}
+.reality-btn {
+    width:100%;
+}
+
+.label-container {
+    font-weight: bold;
+}
+
+.desc {
+    color: gray;
+}
+
+.btn {
+    border-radius: 0;
+}
+body {
+    overflow: visible;
+}
